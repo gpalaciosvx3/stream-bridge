@@ -24,4 +24,22 @@ export class ErrorDictionary {
     descripcion: 'El cuerpo de la solicitud no es válido',
     statusCode: HttpStatus.BAD_REQUEST,
   };
+
+  static readonly INVALID_CLIENT_ID: InputError = {
+    code: 'JOB-001',
+    descripcion: 'El clientId no puede estar vacío',
+    statusCode: HttpStatus.BAD_REQUEST,
+  };
+
+  static readonly INVALID_FILENAME: InputError = {
+    code: 'JOB-002',
+    descripcion: 'El nombre de archivo contiene caracteres no permitidos',
+    statusCode: HttpStatus.BAD_REQUEST,
+  };
+
+  static readonly INVALID_CONTENT_TYPE: InputError = {
+    code: 'JOB-003',
+    descripcion: 'El tipo de contenido no está soportado',
+    statusCode: HttpStatus.BAD_REQUEST,
+  };
 }
