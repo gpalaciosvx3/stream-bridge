@@ -1,6 +1,6 @@
 export class NamingConstants {
   private static readonly REGION  = 'UE1';
-  private static readonly PROJECT = 'STB';
+  private static readonly PROJECT = 'STREAMBRIDGE';
 
   static readonly LMB_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}LMB001`;
 
