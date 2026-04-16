@@ -123,10 +123,13 @@ awslocal dynamodb describe-table \
   --table-name UE1STREAMBRIDGEDDB001 \
   --query 'Table.{Status:TableStatus,TTL:TimeToLiveDescription,GSIs:GlobalSecondaryIndexes[*].IndexName}'
 
+awslocal dynamodb describe-table \
+  --table-name UE1STREAMBRIDGEDDB002 \
+  --query 'Table.{Status:TableStatus,TTL:TimeToLiveDescription,GSIs:GlobalSecondaryIndexes[*].IndexName}'
+
 # Escanear items (verificar escritura desde upload-request)
-awslocal dynamodb scan \
-  --table-name UE1STREAMBRIDGEDDB001 \
-  --query 'Items[*].{jobId:jobId.S,status:status.S,clientId:clientId.S}'
+awslocal dynamodb scan --table-name UE1STREAMBRIDGEDDB001 
+awslocal dynamodb scan --table-name UE1STREAMBRIDGEDDB002 
 ```
 
 ### S3

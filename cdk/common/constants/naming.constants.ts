@@ -5,6 +5,7 @@ export class NamingConstants {
   static readonly LMB_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}LMB001`;
 
   static readonly DDB_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}DDB001`;
+  static readonly DDB_002 = `${NamingConstants.REGION}${NamingConstants.PROJECT}DDB002`;
 
   static readonly S3_001  = `${NamingConstants.REGION}${NamingConstants.PROJECT}S3001`.toLowerCase();
 

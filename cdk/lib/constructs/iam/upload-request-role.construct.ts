@@ -3,8 +3,9 @@ import { Construct } from 'constructs';
 import { ResourceConstants } from '../../../common/constants/resource.constants';
 
 interface UploadRequestRoleProps {
-  tableArn:  string;
-  bucketArn: string;
+  jobsTableArn:    string;
+  schemasTableArn: string;
+  bucketArn:       string;
 }
 
 export class UploadRequestRoleConstruct extends Construct {
@@ -32,7 +33,15 @@ export class UploadRequestRoleConstruct extends Construct {
           statements: [
             new iam.PolicyStatement({
               actions:   ['dynamodb:PutItem'],
-              resources: [props.tableArn],
+              resources: [props.jobsTableArn],
+            }),
+          ],
+        }),
+        DynamoDbGetSchema: new iam.PolicyDocument({
+          statements: [
+            new iam.PolicyStatement({
+              actions:   ['dynamodb:GetItem'],
+              resources: [props.schemasTableArn],
             }),
           ],
         }),

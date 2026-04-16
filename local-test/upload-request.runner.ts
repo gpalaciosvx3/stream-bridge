@@ -21,9 +21,9 @@ const event: APIGatewayProxyEventV2 = {
     timeEpoch: Date.now(),
   },
   body: JSON.stringify({
-    clientId: 'ac-farma',
-    filename: 'inventario-dist-norte.xlsx',
-    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    clientId: 'ac-farma-dist-norte',
+    filename: 'ac-farma-dist-norte.csv',
+    contentType: 'text/csv',
   }),
   isBase64Encoded: false,
 };

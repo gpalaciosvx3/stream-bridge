@@ -1,80 +1,17 @@
-/**
- * Seed: stream-bridge-schemas
- *
- * Popula la tabla DynamoDB con los schemas de validación multi-tenant.
- * Ejecutar contra LocalStack: DYNAMODB_ENDPOINT=http://localhost:4566 ts-node local-test/seed-schemas.ts
- * Ejecutar contra AWS real: ts-node local-test/seed-schemas.ts (usa credenciales del perfil AWS activo)
- *
- * Dependencias requeridas (aún no en package.json, el agente de dev las agrega en FASE 8):
- *   npm install --save-dev @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb
- *
- * ─────────────────────────────────────────────────────────────
- * Clientes registrados en este seed:
- *
- *   clientId: ac-farma-dist-norte
- *     Archivo de ejemplo: local-test/samples/ac-farma-dist-norte.csv
- *     Formato esperado:   CSV
- *     Política:           LENIENT (tolera hasta 5% de errores)
- *
- *   clientId: ac-farma-dist-sur
- *     Archivo de ejemplo: local-test/samples/ac-farma-dist-sur.xml
- *     Formato esperado:   XML
- *     Política:           LENIENT (tolera hasta 5% de errores)
- *
- *   clientId: prima-afp
- *     Archivo de ejemplo: local-test/samples/prima-afp-aportes.csv
- *     Formato esperado:   CSV
- *     Política:           STRICT (cualquier error detiene el pipeline)
- *
- *   clientId: ac-farma-dist-este
- *     Archivo de ejemplo: local-test/samples/ac-farma-dist-este.txt
- *     Formato esperado:   TXT (pipe-delimited)
- *     Política:           LENIENT (tolera hasta 5% de errores)
- *
- *   clientId: ac-farma-dist-oeste
- *     Archivo de ejemplo: local-test/samples/ac-farma-dist-oeste.xlsx
- *     Formato esperado:   Excel (.xlsx)
- *     Política:           LENIENT (tolera hasta 5% de errores)
- *     NOTA: el archivo .xlsx es binario y no puede generarse automáticamente.
- *           Crearlo manualmente en cualquier spreadsheet con las columnas:
- *           SKU_PROD | NOMBRE_PROD | PRESENTACION | UNIDADES | PRECIO_COSTO | PRECIO_VENTA | VENCIMIENTO | LOTE
- * ─────────────────────────────────────────────────────────────
- *
- * Formato del campo `zodSchema` (SchemaDescriptor):
- *   Cada clave = nombre de columna tal como llega del parser (case-sensitive).
- *   El validator Lambda deserializa este JSON y construye el schema Zod dinámicamente.
- *
- *   FieldRule:
- *     type:     'string' | 'number' | 'enum' | 'boolean'
- *     required: boolean
- *     min?:     number  → string: minLength | number: valor mínimo
- *     max?:     number  → string: maxLength | number: valor máximo
- *     format?:  'YYYY-MM-DD' | 'YYYY-MM'   → regex de formato aplicado al string
- *     values?:  string[]                   → valores válidos para tipo enum
- */
-
-import 'dotenv/config';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 
-// ─── Cliente DynamoDB ────────────────────────────────────────────────────────
-
+const TABLE_NAME = 'UE1STREAMBRIDGEDDB002';
 const client = new DynamoDBClient({
-  region: process.env['AWS_REGION'] ?? 'us-east-1',
-  ...(process.env['DYNAMODB_ENDPOINT']
-    ? { endpoint: process.env['DYNAMODB_ENDPOINT'] }
-    : {}),
+  region:      'us-east-1',
+  endpoint:    'http://localhost:4566',
+  credentials: { accessKeyId: 'test', secretAccessKey: 'test' },
 });
-
 const ddb = DynamoDBDocumentClient.from(client);
-
-const TABLE_NAME = process.env['SCHEMAS_TABLE_NAME'] ?? 'stream-bridge-schemas-dev';
-
-// ─── Schemas ─────────────────────────────────────────────────────────────────
 
 const schemas = [
   /**
-   * AC Farma — Distribuidora Norte
+   * Distribuidora Norte
    * Formato: CSV
    * Columnas: codigo_producto, nombre_producto, presentacion, cantidad_unidades,
    *           precio_unit_sin_igv, fecha_vencimiento, numero_lote, registro_sanitario
@@ -99,7 +36,7 @@ const schemas = [
   },
 
   /**
-   * AC Farma — Distribuidora Sur
+   * Distribuidora Sur
    * Formato: XML
    * Nodos hijos de <producto>: sku, descripcion, unidades_stock, precio,
    *                             fecha_expiracion, lote
@@ -124,7 +61,7 @@ const schemas = [
   },
 
   /**
-   * Prima AFP — Aportes de empleadores
+   * Aportes de empleadores
    * Formato: CSV
    * Columnas: ruc_empleador, nombre_empleador, dni_afiliado, apellidos_nombres,
    *           periodo, monto_aporte, tipo_aporte, observaciones
@@ -150,7 +87,7 @@ const schemas = [
   },
 
   /**
-   * AC Farma — Distribuidora Este
+   * Distribuidora Este
    * Formato: TXT (pipe-delimited)
    * Columnas: CODIGO_PROD, NOMBRE_COMERCIAL, CONCENTRACION, FORMA_FARMAC,
    *           CANTIDAD, PVP, FECH_VCTO, NRO_LOTE, ESTADO
@@ -181,7 +118,7 @@ const schemas = [
   },
 
   /**
-   * AC Farma — Distribuidora Oeste
+   * Distribuidora Oeste
    * Formato: Excel (.xlsx)
    * Columnas (primera hoja, primera fila = headers):
    *   SKU_PROD | NOMBRE_PROD | PRESENTACION | UNIDADES | PRECIO_COSTO | PRECIO_VENTA | VENCIMIENTO | LOTE
@@ -209,8 +146,6 @@ const schemas = [
     }),
   },
 ];
-
-// ─── Runner ──────────────────────────────────────────────────────────────────
 
 async function seed(): Promise<void> {
   console.log(`Seeding ${schemas.length} schemas into "${TABLE_NAME}"...\n`);

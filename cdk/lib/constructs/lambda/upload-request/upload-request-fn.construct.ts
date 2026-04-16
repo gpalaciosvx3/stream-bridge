@@ -12,8 +12,9 @@ import { LambdaLogGroupConstruct } from '../../cloudwatch/lambda-log-group.const
 import { UploadRequestRoleConstruct } from '../../iam/upload-request-role.construct';
 
 interface UploadRequestFnProps {
-  table:  dynamodb.Table;
-  bucket: s3.Bucket;
+  jobTable:     dynamodb.Table;
+  schemasTable: dynamodb.Table;
+  bucket:       s3.Bucket;
 }
 
 export class UploadRequestFnConstruct extends Construct {
@@ -27,8 +28,9 @@ export class UploadRequestFnConstruct extends Construct {
     });
 
     const role = new UploadRequestRoleConstruct(this, 'Role', {
-      tableArn:  props.table.tableArn,
-      bucketArn: props.bucket.bucketArn,
+      jobsTableArn:    props.jobTable.tableArn,
+      schemasTableArn: props.schemasTable.tableArn,
+      bucketArn:       props.bucket.bucketArn,
     });
 
     this.fn = new NodejsFunction(this, 'Fn', {
@@ -43,8 +45,9 @@ export class UploadRequestFnConstruct extends Construct {
       memorySize: InfraConstants.LAMBDA_MEMORY_DEFAULT_MB,
       bundling: lambdaBundling,
       environment: {
-        S3_BUCKET:  props.bucket.bucketName,
-        JOBS_TABLE: props.table.tableName,
+        S3_BUCKET:    props.bucket.bucketName,
+        JOBS_TABLE:   props.jobTable.tableName,
+        SCHEMAS_TABLE: props.schemasTable.tableName,
       },
     });
   }

@@ -6,6 +6,7 @@
     "build": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
+    "local:seed": "ts-node local-test/seed.runner.ts",
     "local:upload-request": "ts-node local-test/upload-request.runner.ts"
   },
   "dependencies": {
