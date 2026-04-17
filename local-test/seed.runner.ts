@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 
 const TABLE_NAME = 'UE1STREAMBRIDGEDDB002';
 const client = new DynamoDBClient({
@@ -17,7 +17,7 @@ const schemas = [
    *           precio_unit_sin_igv, fecha_vencimiento, numero_lote, registro_sanitario
    */
   {
-    clientId: 'ac-farma-dist-norte',
+    clientId: 'dist-norte',
     schemaVersion: 'v1',
     active: true,
     validationPolicy: 'LENIENT',
@@ -44,7 +44,7 @@ const schemas = [
    *       Esto demuestra el valor del schema registry multi-tenant.
    */
   {
-    clientId: 'ac-farma-dist-sur',
+    clientId: 'dist-sur',
     schemaVersion: 'v1',
     active: true,
     validationPolicy: 'LENIENT',
@@ -68,7 +68,7 @@ const schemas = [
    * Política STRICT: cualquier fila inválida detiene el pipeline completo.
    */
   {
-    clientId: 'prima-afp',
+    clientId: 'afp',
     schemaVersion: 'v1',
     active: true,
     validationPolicy: 'STRICT',
@@ -91,13 +91,13 @@ const schemas = [
    * Formato: TXT (pipe-delimited)
    * Columnas: CODIGO_PROD, NOMBRE_COMERCIAL, CONCENTRACION, FORMA_FARMAC,
    *           CANTIDAD, PVP, FECH_VCTO, NRO_LOTE, ESTADO
-   * Archivo de ejemplo: local-test/samples/ac-farma-dist-este.txt
+   * Archivo de ejemplo: local-test/samples/dist-este.txt
    *
    * parserConfig.delimiter = '|' → el Parser lee este campo desde DynamoDB
    * cuando detecta formato TXT antes de procesar las filas.
    */
   {
-    clientId: 'ac-farma-dist-este',
+    clientId: 'dist-este',
     schemaVersion: 'v1',
     active: true,
     validationPolicy: 'LENIENT',
@@ -125,10 +125,10 @@ const schemas = [
    *
    * NOTA: el archivo .xlsx es un binario que no puede generarse automáticamente.
    *       Crearlo manualmente en Excel/Google Sheets con las columnas indicadas.
-   *       Guardarlo en: local-test/samples/ac-farma-dist-oeste.xlsx
+   *       Guardarlo en: local-test/samples/dist-oeste.xlsx
    */
   {
-    clientId: 'ac-farma-dist-oeste',
+    clientId: 'dist-oeste',
     schemaVersion: 'v1',
     active: true,
     validationPolicy: 'LENIENT',
@@ -151,6 +151,16 @@ async function seed(): Promise<void> {
   console.log(`Seeding ${schemas.length} schemas into "${TABLE_NAME}"...\n`);
 
   for (const schema of schemas) {
+    const existing = await ddb.send(new GetCommand({
+      TableName: TABLE_NAME,
+      Key: { clientId: schema.clientId, schemaVersion: schema.schemaVersion },
+    }));
+
+    if (existing.Item) {
+      console.log(`  - ${schema.clientId} @ ${schema.schemaVersion} — ya existe, se omite`);
+      continue;
+    }
+
     await ddb.send(new PutCommand({ TableName: TABLE_NAME, Item: schema }));
     console.log(`  ✓ ${schema.clientId} @ ${schema.schemaVersion} (${schema.validationPolicy})`);
   }

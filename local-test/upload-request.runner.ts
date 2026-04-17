@@ -21,8 +21,8 @@ const event: APIGatewayProxyEventV2 = {
     timeEpoch: Date.now(),
   },
   body: JSON.stringify({
-    clientId: 'ac-farma-dist-norte',
-    filename: 'ac-farma-dist-norte.csv',
+    clientId: 'dist-norte',
+    filename: 'dist-norte.csv',
     contentType: 'text/csv',
   }),
   isBase64Encoded: false,

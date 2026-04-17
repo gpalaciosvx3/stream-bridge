@@ -26,7 +26,7 @@ export class UploadRequestService {
       UploadRequestConstants.PRESIGNED_URL_TTL_SECONDS,
     );
 
-    this.logger.log(`[PASO 3] Guardando job en la base de datos para jobId => ${job.jobId}`);
+    this.logger.log(`[PASO 3] Guardando job en la base de datos para url => ${uploadUrl.slice(0, 50)}...`);
     await this.jobDbRepository.save(job);
 
     return { jobId: job.jobId, uploadUrl, expiresIn: UploadRequestConstants.PRESIGNED_URL_TTL_SECONDS };

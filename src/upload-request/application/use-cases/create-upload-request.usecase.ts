@@ -11,9 +11,10 @@ export class CreateUploadRequestUseCase {
   
   constructor(private readonly uploadRequestService: UploadRequestService) {}
 
-  async execute(body: unknown): Promise<UploadRequestResponseDto> {
-    this.logger.log(`---------- INICIO: UPLOAD-REQUEST => Cliente ${JSON.stringify(body)} ----------`);
-    const result = UploadRequestRequestDto.safeParse(body);
+  async execute(raw: unknown): Promise<UploadRequestResponseDto> {
+    this.logger.log(`---------- INICIO: UPLOAD-REQUEST ----------`);
+    this.logger.log(`Body recibido: ${JSON.stringify(raw)}`);
+    const result = UploadRequestRequestDto.safeParse(raw);
 
     if (!result.success) throw new ValidationException(ErrorDictionary.VALIDATION_ERROR, result.error.issues);
     this.logger.log(`DTO validado correctamente para cliente: ${result.data.clientId}`);
