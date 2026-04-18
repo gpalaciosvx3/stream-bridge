@@ -10,5 +10,5 @@ const input: ParseInput = {
 };
 
 handler(input)
-  .then(result => console.log('[PARSER] Resultado:', JSON.stringify(result, null, 2)))
-  .catch(console.error);
+  .then(result => console.log('[PARSER-RUNNER] Resultado:', JSON.stringify(result, null, 2)))
+  .catch(error => console.error('[PARSER-RUNNER] Error:', error));

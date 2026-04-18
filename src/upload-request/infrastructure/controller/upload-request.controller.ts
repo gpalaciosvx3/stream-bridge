@@ -1,21 +1,16 @@
-import { Injectable, HttpStatus, Logger } from '@nestjs/common';
+import { Injectable, HttpStatus } from '@nestjs/common';
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { CreateUploadRequestUseCase } from '../../application/use-cases/create-upload-request.usecase';
 import { ApiGwHelper } from '../../../common/helpers/api-gw.helper';
 import { ApiGwExtracted } from '../../../common/middleware/types/lambda-event.types';
+import { HandleExecution } from '../../../common/decorator/handle-execution.decorator';
 
 @Injectable()
 export class UploadRequestController {
-  private readonly logger = new Logger(UploadRequestController.name);
-
   constructor(private readonly useCase: CreateUploadRequestUseCase) {}
 
+  @HandleExecution('UPLOAD-REQUEST', ApiGwHelper.error)
   async handle(event: ApiGwExtracted): Promise<APIGatewayProxyResult> {
-    try {
-      return ApiGwHelper.success(HttpStatus.OK, await this.useCase.execute(event.body));
-    } catch (error) {
-      this.logger.error('Error en upload-request', error);
-      return ApiGwHelper.error(error);
-    }
+    return ApiGwHelper.success(HttpStatus.OK, await this.useCase.execute(event.body));
   }
 }
