@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { UploadRequestService } from '../../domain/service/upload-request.service';
 import { UploadRequestRequestDto } from '../dtos/upload-request.request.dto';
-import { UploadRequestResponseDto } from '../dtos/upload-request.response.dto';
+import { UploadRequestOutput } from '../../domain/types/upload-request-output.types';
 import { ValidationException } from '../../../common/errors/custom.exception';
 import { ErrorDictionary } from '../../../common/errors/error.dictionary';
 import { LogExecution } from '../../../common/decorator/log-execution.decorator';
@@ -13,7 +13,7 @@ export class CreateUploadRequestUseCase {
   constructor(private readonly uploadRequestService: UploadRequestService) {}
 
   @LogExecution('UPLOAD-REQUEST')
-  async execute(raw: unknown): Promise<UploadRequestResponseDto> {
+  async execute(raw: unknown): Promise<UploadRequestOutput> {
     this.logger.log(`Body recibido: ${JSON.stringify(raw)}`);
     const result = UploadRequestRequestDto.safeParse(raw);
 

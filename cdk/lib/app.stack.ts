@@ -6,6 +6,7 @@ import { SchemasTableConstruct } from './constructs/dynamo/schemas-table.constru
 import { PipelineBucketConstruct } from './constructs/s3/pipeline-bucket.construct';
 import { UploadRequestFnConstruct } from './constructs/lambda/upload-request/upload-request-fn.construct';
 import { PipelineTriggerFnConstruct } from './constructs/lambda/pipeline-trigger/pipeline-trigger-fn.construct';
+import { ParserFnConstruct } from './constructs/lambda/parser/parser-fn.construct';
 import { FileIngestionQueueConstruct } from './constructs/sqs/file-ingestion-queue.construct';
 import { FileIngestionDlqConstruct } from './constructs/sqs/file-ingestion-dlq.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
@@ -33,6 +34,11 @@ export class AppStack extends cdk.Stack {
     new PipelineTriggerFnConstruct(this, 'PipelineTriggerFn', {
       jobsTable: jobsTable.table,
       queue:     ingestionQueue.queue,
+    });
+
+    new ParserFnConstruct(this, 'ParserFn', {
+      jobsTable: jobsTable.table,
+      bucket:    bucket.bucket,
     });
 
     const api = new HttpApiConstruct(this, 'HttpApi', {

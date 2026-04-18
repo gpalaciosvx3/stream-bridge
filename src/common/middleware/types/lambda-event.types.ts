@@ -15,4 +15,9 @@ export type SqsExtracted = {
   records: SqsMessage[];
 };
 
-export type LambdaExtracted = ApiGwExtracted | SqsExtracted;
+export type StepFnExtracted<T = unknown> = {
+  source: 'step-fn';
+  input: T;
+};
+
+export type LambdaExtracted = ApiGwExtracted | SqsExtracted | StepFnExtracted;

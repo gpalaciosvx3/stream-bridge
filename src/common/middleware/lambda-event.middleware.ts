@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyEventV2, SQSEvent } from 'aws-lambda';
-import { LambdaExtracted } from './types/lambda-event.types';
+import { LambdaExtracted, StepFnExtracted } from './types/lambda-event.types';
 
 export class LambdaEventMiddleware {
   static extract(event: unknown): LambdaExtracted {
@@ -31,6 +31,13 @@ export class LambdaEventMiddleware {
           body: JSON.parse(r.body),
           messageId: r.messageId,
         })),
+      };
+    }
+
+    if (LambdaEventMiddleware.isStepFn(event)) {
+      return { 
+        source: 'step-fn',
+        input: event 
       };
     }
 
@@ -68,6 +75,17 @@ export class LambdaEventMiddleware {
       (e['Records'] as unknown[]).length > 0 &&
       typeof (e['Records'] as Record<string, unknown>[])[0]['eventSource'] === 'string' &&
       (e['Records'] as Record<string, unknown>[])[0]['eventSource'] === 'aws:sqs'
+    );
+  }
+
+  private static isStepFn(event: unknown): boolean {
+    const e = event as Record<string, unknown>;
+    return (
+      typeof e === 'object' &&
+      e !== null &&
+      !Array.isArray(e) &&
+      !('requestContext' in e) &&
+      !('Records' in e)
     );
   }
 }

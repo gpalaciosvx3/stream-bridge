@@ -13,4 +13,9 @@ export class EnvConstants {
     EnvConstants.JOBS_TABLE,
     EnvConstants.STEP_FUNCTIONS_ARN,
   ];
+
+  static readonly REQUERIDAS_PARSER: readonly string[] = [
+    EnvConstants.S3_BUCKET,
+    EnvConstants.JOBS_TABLE,
+  ];
 }

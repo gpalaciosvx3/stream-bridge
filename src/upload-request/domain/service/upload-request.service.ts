@@ -3,8 +3,8 @@ import { JobDbRepository } from '../repository/job.db.repository';
 import { PresignedUrlS3Repository } from '../repository/presigned-url.s3.repository';
 import { JobEntity } from '../entities/job.entity';
 import { UploadRequestConstants } from '../constants/upload-request.constants';
-import { UploadRequestRequestDtoType } from '../../application/dtos/upload-request.request.dto';
-import { UploadRequestResponseDto } from '../../application/dtos/upload-request.response.dto';
+import { UploadRequestInput } from '../types/upload-request-input.types';
+import { UploadRequestOutput } from '../types/upload-request-output.types';
 
 @Injectable()
 export class UploadRequestService {
@@ -15,7 +15,7 @@ export class UploadRequestService {
     private readonly presignedUrlRepository: PresignedUrlS3Repository,
   ) {}
 
-  async createUpload(dto: UploadRequestRequestDtoType): Promise<UploadRequestResponseDto> {
+  async createUpload(dto: UploadRequestInput): Promise<UploadRequestOutput> {
     this.logger.log(`[PASO 1] Creando entidad de Job para => cliente: ${dto.clientId} | filename: ${dto.filename}`);
     const job = JobEntity.build(dto);
 
@@ -29,6 +29,6 @@ export class UploadRequestService {
     this.logger.log(`[PASO 3] Guardando job en la base de datos para url => ${uploadUrl.slice(0, 50)}...`);
     await this.jobDbRepository.save(job);
 
-    return { jobId: job.jobId, uploadUrl, expiresIn: UploadRequestConstants.PRESIGNED_URL_TTL_SECONDS };
+    return job.toOutput(uploadUrl);
   }
 }

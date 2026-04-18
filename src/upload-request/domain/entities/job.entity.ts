@@ -2,6 +2,7 @@ import { CustomException } from '../../../common/errors/custom.exception';
 import { ErrorDictionary, InputError } from '../../../common/errors/error.dictionary';
 import { JobStatus } from '../../../common/types/job-status.types';
 import { UploadRequestConstants } from '../constants/upload-request.constants';
+import { UploadRequestOutput } from '../types/upload-request-output.types';
 
 export class JobEntity {
   private constructor(
@@ -42,5 +43,13 @@ export class JobEntity {
       .forEach(([, error]) => {
         throw new CustomException(error);
       });
+  }
+
+  toOutput(uploadUrl: string): UploadRequestOutput {
+    return {
+      jobId:     this.jobId,
+      uploadUrl,
+      expiresIn: UploadRequestConstants.PRESIGNED_URL_TTL_SECONDS,
+    };
   }
 }

@@ -4,6 +4,7 @@ export class NamingConstants {
 
   static readonly LMB_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}LMB001`;
   static readonly LMB_002 = `${NamingConstants.REGION}${NamingConstants.PROJECT}LMB002`;
+  static readonly LMB_003 = `${NamingConstants.REGION}${NamingConstants.PROJECT}LMB003`;
 
   static readonly DDB_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}DDB001`;
   static readonly DDB_002 = `${NamingConstants.REGION}${NamingConstants.PROJECT}DDB002`;
@@ -19,5 +20,6 @@ export class NamingConstants {
 
   static readonly ROL_001 = `${NamingConstants.REGION}${NamingConstants.PROJECT}ROL001`;
   static readonly ROL_002 = `${NamingConstants.REGION}${NamingConstants.PROJECT}ROL002`;
+  static readonly ROL_003 = `${NamingConstants.REGION}${NamingConstants.PROJECT}ROL003`;
   static readonly ROL_006 = `${NamingConstants.REGION}${NamingConstants.PROJECT}ROL006`;
 }

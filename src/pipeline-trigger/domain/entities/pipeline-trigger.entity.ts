@@ -29,7 +29,7 @@ export class PipelineTriggerEntity {
     const parts  = key.split('/');
 
     if (parts.length < S3_KEY_MIN_PARTS) {
-      throw new CustomException(ErrorDictionary.INTERNAL_ERROR, `S3 key con formato inesperado: ${key}`);
+      throw new CustomException(ErrorDictionary.INVALID_S3_KEY, key);
     }
 
     return new PipelineTriggerEntity(

@@ -48,4 +48,28 @@ export class ErrorDictionary {
     descripcion: 'El job solicitado no existe',
     statusCode: HttpStatus.NOT_FOUND,
   };
+
+  static readonly INVALID_S3_KEY: InputError = {
+    code: 'JOB-005',
+    descripcion: 'La S3 key no tiene el formato esperado',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+  };
+
+  static readonly UNSUPPORTED_FORMAT: InputError = {
+    code: 'PARSER-001',
+    descripcion: 'El formato del archivo no está soportado',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+  };
+
+  static readonly EMPTY_FILE: InputError = {
+    code: 'PARSER-002',
+    descripcion: 'El archivo no contiene filas de datos',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+  };
+
+  static readonly INVALID_STEP_FN_INPUT: InputError = {
+    code: 'PARSER-003',
+    descripcion: 'El input recibido desde Step Functions es inválido o incompleto',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+  };
 }
