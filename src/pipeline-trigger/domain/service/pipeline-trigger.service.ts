@@ -15,6 +15,7 @@ export class PipelineTriggerService {
 
   async trigger(rawBody: unknown): Promise<void> {
     this.logger.log(`[PASO 1] Validando input del body => ${JSON.stringify(rawBody).slice(0, 100)}...`);
+    if (this.isTestEvent(rawBody)) return;
     const entity = PipelineTriggerEntity.build(rawBody);
 
     this.logger.log(`[PASO 2] Consultando job => ${entity.jobId}`);
@@ -31,6 +32,14 @@ export class PipelineTriggerService {
 
     this.logger.log(`[PASO 6] Actualizando job a PROCESSING => ${entity.jobId}`);
     await this.jobDbRepository.transitionToProcessing(entity.jobId);
+  }
+
+  private isTestEvent(rawBody: unknown): boolean {
+    if (PipelineTriggerEntity.isTestEvent(rawBody)) {
+      this.logger.log('Evento de prueba S3 detectado, se omite sin error');
+      return true;
+    }
+    return false;
   }
 
   private isExecutionDuplicated(started: boolean, jobId: string): boolean {

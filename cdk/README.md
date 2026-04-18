@@ -29,10 +29,12 @@ cdk/
     constructs/
       api-gateway/      # REST API v1, API Key, Usage Plan
       cloudwatch/       # Log groups por Lambda
-      dynamo/           # Tabla de jobs con TTL y GSIs
-      iam/              # Roles de ejecución por Lambda
+      dynamo/           # Tablas jobs (TTL) y schemas
+      iam/              # Roles de ejecución por Lambda y Step Functions
       lambda/           # Una construct por función Lambda
       s3/               # Bucket de pipeline (raw / staging / processed)
+      sfn/              # State Machine (pipeline.asl.yaml + construct)
+      sqs/              # Queue de ingesta + DLQ
   common/
     constants/          # NamingConstants, ResourceConstants, InfraConstants
     stages/             # local.stage.ts, dev.stage.ts
@@ -162,6 +164,14 @@ awslocal apigateway get-rest-apis \
 awslocal apigateway get-resources \
   --rest-api-id <api-id> \
   --query 'items[*].{path:path,methods:resourceMethods}'
+
+# Listar ApiKeys
+awslocal apigateway get-api-key \
+  --api-key $(awslocal apigateway get-api-keys --query 'items[?name==`UE1STREAMBRIDGEGTW001-KEY`].id' --output text) \
+  --include-value \
+  --query 'value' \
+  --output text
+
 ```
 
 ### IAM
@@ -175,6 +185,59 @@ awslocal iam get-role-policy \
 awslocal iam get-role-policy \
   --role-name UE1STBROL001 \
   --policy-name DynamoDbPutJob
+```
+
+### SQS
+
+```bash
+# Listar todas las queues
+awslocal sqs list-queues
+
+# Obtener atributos de la queue (confirmar visibilityTimeout, DLQ)
+awslocal sqs get-queue-attributes \
+  --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/UE1STREAMBRIDGESQS001 \
+  --attribute-names All
+
+# Ver mensajes en DLQ (sin consumirlos)
+awslocal sqs receive-message \
+  --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/UE1STREAMBRIDGESQS002 \
+  --max-number-of-messages 10 \
+  --visibility-timeout 0
+
+# Purgar DLQ (limpiar mensajes fallidos en local)
+awslocal sqs purge-queue \
+  --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/UE1STREAMBRIDGESQS002
+```
+
+### Step Functions
+
+```bash
+# Listar state machines
+awslocal stepfunctions list-state-machines
+
+# Ver definición ASL desplegada
+awslocal stepfunctions describe-state-machine \
+  --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:UE1STREAMBRIDGESFN001
+
+# Listar ejecuciones (últimas 10)
+awslocal stepfunctions list-executions \
+  --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:UE1STREAMBRIDGESFN001 \
+  --max-results 10
+
+# Ver detalle de una ejecución (input, output, estado)
+awslocal stepfunctions describe-execution \
+  --execution-arn <execution-arn>
+
+# Ver historial de eventos de una ejecución (debug paso a paso)
+awslocal stepfunctions get-execution-history \
+  --execution-arn <execution-arn> \
+  --query 'events[*].{type:type,ts:timestamp,detail:taskSucceededEventDetails}'
+
+# Iniciar ejecución manualmente (prueba end-to-end)
+awslocal stepfunctions start-execution \
+  --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:UE1STREAMBRIDGESFN001 \
+  --name test-manual-$(date +%s) \
+  --input '{"clientId":"ac-farma","jobId":"<jobId>","bucket":"ue1streambridges3001","key":"raw-uploads/ac-farma/2026-04-18/<jobId>/test.csv"}'
 ```
 
 ---
@@ -203,10 +266,17 @@ Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el
 | Recurso | Construct | Nombre físico |
 |---|---|---|
 | Lambda upload-request | `UploadRequestFnConstruct` | `UE1STREAMBRIDGELMB001` |
+| Lambda pipeline-trigger | `PipelineTriggerFnConstruct` | `UE1STREAMBRIDGELMB002` |
 | DynamoDB jobs table | `JobsTableConstruct` | `UE1STREAMBRIDGEDDB001` |
+| DynamoDB schemas table | `SchemasTableConstruct` | `UE1STREAMBRIDGEDDB002` |
 | S3 pipeline bucket | `PipelineBucketConstruct` | `ue1streambridges3001` |
+| SQS file-ingestion queue | `FileIngestionQueueConstruct` | `UE1STREAMBRIDGESQS001` |
+| SQS file-ingestion DLQ | `FileIngestionDlqConstruct` | `UE1STREAMBRIDGESQS002` |
 | API Gateway REST | `HttpApiConstruct` | `UE1STREAMBRIDGEGTW001` |
+| Step Functions State Machine | `PipelineStateMachineConstruct` | `UE1STREAMBRIDGESFN001` |
 | IAM Role upload-request | `UploadRequestRoleConstruct` | `UE1STREAMBRIDGEROL001` |
+| IAM Role pipeline-trigger | `PipelineTriggerRoleConstruct` | `UE1STREAMBRIDGEROL002` |
+| IAM Role Step Functions | `SfnRoleConstruct` | `UE1STREAMBRIDGEROL006` |
 
 ---
 

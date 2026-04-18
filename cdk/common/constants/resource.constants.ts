@@ -12,4 +12,5 @@ export class ResourceConstants {
   static readonly STATE_MACHINE            = NamingConstants.SFN_001;
   static readonly UPLOAD_REQUEST_ROLE      = NamingConstants.ROL_001;
   static readonly PIPELINE_TRIGGER_ROLE    = NamingConstants.ROL_002;
+  static readonly SFN_EXECUTION_ROLE       = NamingConstants.ROL_006;
 }

@@ -13,6 +13,11 @@ export class PipelineTriggerEntity {
     public readonly jobId:    string,
   ) {}
 
+  static isTestEvent(rawBody: unknown): boolean {
+    const body = rawBody as Record<string, unknown>;
+    return body?.Event === 's3:TestEvent';
+  }
+
   static build(rawBody: unknown): PipelineTriggerEntity {
     const notification = rawBody as S3EventNotification;
     const record = notification?.Records?.[0];

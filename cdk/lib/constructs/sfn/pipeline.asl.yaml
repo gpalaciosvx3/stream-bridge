@@ -1,0 +1,152 @@
+Comment: "StreamBridge — Pipeline ETL: Parser → Validator → Loader"
+StartAt: Parser
+
+States:
+  # ─────────────────────────────────────────────
+  # PASO 1: Parser
+  # ─────────────────────────────────────────────
+  Parser:
+    Type: Task
+    Resource: "arn:aws:states:::lambda:invoke"
+    Parameters:
+      FunctionName: "${ParserFunctionArn}"
+      Payload.$: "$"
+    ResultSelector:
+      clientId.$: "$.Payload.clientId"
+      jobId.$: "$.Payload.jobId"
+      stagedKey.$: "$.Payload.stagedKey"
+      checksum.$: "$.Payload.checksum"
+      totalRows.$: "$.Payload.totalRows"
+    ResultPath: "$"
+    Retry:
+      - ErrorEquals:
+          - "States.ALL"
+        IntervalSeconds: 2
+        MaxAttempts: 2
+        BackoffRate: 2.0
+        MaxDelaySeconds: 30
+    Catch:
+      - ErrorEquals:
+          - "States.ALL"
+        Next: ParserFailed
+        ResultPath: "$.error"
+    Next: Validator
+
+  ParserFailed:
+    Type: Pass
+    Parameters:
+      jobId.$: "$.jobId"
+      failedStep: "Parser"
+      failedAt.$: "$$.State.EnteredTime"
+      error.$: "$.error"
+    Next: OnFailure
+
+  # ─────────────────────────────────────────────
+  # PASO 2: Validator
+  # ─────────────────────────────────────────────
+  Validator:
+    Type: Task
+    Resource: "arn:aws:states:::lambda:invoke"
+    Parameters:
+      FunctionName: "${ValidatorFunctionArn}"
+      Payload.$: "$"
+    ResultSelector:
+      clientId.$: "$.Payload.clientId"
+      jobId.$: "$.Payload.jobId"
+      stagedKey.$: "$.Payload.stagedKey"
+      checksum.$: "$.Payload.checksum"
+      validationReport.$: "$.Payload.validationReport"
+    ResultPath: "$"
+    Retry:
+      - ErrorEquals:
+          - "States.ALL"
+        IntervalSeconds: 2
+        MaxAttempts: 2
+        BackoffRate: 2.0
+        MaxDelaySeconds: 30
+    Catch:
+      - ErrorEquals:
+          - "States.ALL"
+        Next: ValidatorFailed
+        ResultPath: "$.error"
+    Next: Loader
+
+  ValidatorFailed:
+    Type: Pass
+    Parameters:
+      jobId.$: "$.jobId"
+      failedStep: "Validator"
+      failedAt.$: "$$.State.EnteredTime"
+      error.$: "$.error"
+    Next: OnFailure
+
+  # ─────────────────────────────────────────────
+  # PASO 3: Loader
+  # ─────────────────────────────────────────────
+  Loader:
+    Type: Task
+    Resource: "arn:aws:states:::lambda:invoke"
+    Parameters:
+      FunctionName: "${LoaderFunctionArn}"
+      Payload.$: "$"
+    ResultSelector:
+      jobId.$: "$.Payload.jobId"
+      status.$: "$.Payload.status"
+      processedKey.$: "$.Payload.processedKey"
+    ResultPath: "$"
+    Retry:
+      - ErrorEquals:
+          - "States.ALL"
+        IntervalSeconds: 2
+        MaxAttempts: 2
+        BackoffRate: 2.0
+        MaxDelaySeconds: 30
+    Catch:
+      - ErrorEquals:
+          - "States.ALL"
+        Next: LoaderFailed
+        ResultPath: "$.error"
+    End: true
+
+  LoaderFailed:
+    Type: Pass
+    Parameters:
+      jobId.$: "$.jobId"
+      failedStep: "Loader"
+      failedAt.$: "$$.State.EnteredTime"
+      error.$: "$.error"
+    Next: OnFailure
+
+  # ─────────────────────────────────────────────
+  # CATCH GLOBAL: Actualiza el job a FAILED sin Lambda adicional
+  # ─────────────────────────────────────────────
+  OnFailure:
+    Type: Task
+    Resource: "arn:aws:states:::dynamodb:updateItem"
+    Parameters:
+      TableName: "${JobsTableName}"
+      Key:
+        jobId:
+          S.$: "$.jobId"
+      UpdateExpression: "SET #status = :status, #failedStep = :failedStep, #errorMessage = :errorMessage, #errorCause = :errorCause, #failedAt = :failedAt, #updatedAt = :updatedAt"
+      ExpressionAttributeNames:
+        "#status": "status"
+        "#failedStep": "failedStep"
+        "#errorMessage": "errorMessage"
+        "#errorCause": "errorCause"
+        "#failedAt": "failedAt"
+        "#updatedAt": "updatedAt"
+      ExpressionAttributeValues:
+        ":status":
+          S: "FAILED"
+        ":failedStep":
+          S.$: "$.failedStep"
+        ":errorMessage":
+          S.$: "$.error.Error"
+        ":errorCause":
+          S.$: "$.error.Cause"
+        ":failedAt":
+          S.$: "$.failedAt"
+        ":updatedAt":
+          S.$: "$$.State.EnteredTime"
+    End: true
