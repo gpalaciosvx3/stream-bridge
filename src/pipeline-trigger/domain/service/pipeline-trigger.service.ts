@@ -14,7 +14,7 @@ export class PipelineTriggerService {
   ) {}
 
   async trigger(rawBody: unknown): Promise<void> {
-    this.logger.log(`[PASO 1] Validando input del body => ${JSON.stringify(rawBody).slice(0, 100)}...`);
+    this.logger.log('[PASO 1] Validando input del body');
     if (this.isTestEvent(rawBody)) return;
     const entity = PipelineTriggerEntity.build(rawBody);
 
@@ -24,19 +24,19 @@ export class PipelineTriggerService {
     this.logger.log('[PASO 3] Verificando si se debe procesar el job');
     if (this.shouldSkip(job, entity.jobId)) return;
 
-    this.logger.log(`[PASO 4] Iniciando ejecución Step Functions => ${entity.jobId}`);
+    this.logger.log(`[PASO 4] Iniciando ejecución Step Functions con ID => ${entity.jobId}`);
     const started = await this.pipelineSfnRepository.startExecution(entity);
 
     this.logger.log('[PASO 5] Verificando idempotencia de ejecución en Step Functions');
     if (this.isExecutionDuplicated(started, entity.jobId)) return;
 
-    this.logger.log(`[PASO 6] Actualizando job a PROCESSING => ${entity.jobId}`);
+    this.logger.log('[PASO 6] Actualizando job a PROCESSING');
     await this.jobDbRepository.transitionToProcessing(entity.jobId);
   }
 
   private isTestEvent(rawBody: unknown): boolean {
     if (PipelineTriggerEntity.isTestEvent(rawBody)) {
-      this.logger.log('Evento de prueba S3 detectado, se omite sin error');
+      this.logger.log('Evento de localstack en S3 detectado, se omite sin error');
       return true;
     }
     return false;
