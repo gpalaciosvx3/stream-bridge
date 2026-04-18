@@ -115,6 +115,27 @@ export class DynamoClient {
     return (result.Items as T[]) ?? [];
   }
 
+  async updateFieldsAndRemove(
+    table: string,
+    key: Record<string, unknown>,
+    fields: Record<string, unknown>,
+    removeFields: string[],
+  ): Promise<void> {
+    const expression = this.buildUpdateExpression(fields);
+    removeFields.forEach(f => { expression.names[`#${f}`] = f; });
+    const removeParts = removeFields.map(f => `#${f}`).join(', ');
+    const updateExpr = `${expression.update} REMOVE ${removeParts}`;
+    await dynamoDbClient.send(
+      new UpdateCommand({
+        TableName: table,
+        Key: key,
+        UpdateExpression: updateExpr,
+        ExpressionAttributeNames: expression.names,
+        ExpressionAttributeValues: expression.values,
+      }),
+    );
+  }
+
   private buildUpdateExpression(fields: Record<string, unknown>): { update: string; names: Record<string, string>; values: Record<string, unknown> } {
     const names: Record<string, string> = {};
     const values: Record<string, unknown> = {};

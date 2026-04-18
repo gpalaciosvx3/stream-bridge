@@ -5,6 +5,9 @@ import { JobsTableConstruct } from './constructs/dynamo/jobs-table.construct';
 import { SchemasTableConstruct } from './constructs/dynamo/schemas-table.construct';
 import { PipelineBucketConstruct } from './constructs/s3/pipeline-bucket.construct';
 import { UploadRequestFnConstruct } from './constructs/lambda/upload-request/upload-request-fn.construct';
+import { PipelineTriggerFnConstruct } from './constructs/lambda/pipeline-trigger/pipeline-trigger-fn.construct';
+import { FileIngestionQueueConstruct } from './constructs/sqs/file-ingestion-queue.construct';
+import { FileIngestionDlqConstruct } from './constructs/sqs/file-ingestion-dlq.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
 
 interface AppStackProps extends cdk.StackProps {
@@ -15,14 +18,21 @@ export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    const jobTable        = new JobsTableConstruct(this, 'JobsTable');
-    const schemasTable = new SchemasTableConstruct(this, 'SchemasTable');
-    const bucket = new PipelineBucketConstruct(this, 'PipelineBucket');
+    const jobsTable      = new JobsTableConstruct(this, 'JobsTable');
+    const schemasTable   = new SchemasTableConstruct(this, 'SchemasTable');
+    const ingestionDlq            = new FileIngestionDlqConstruct(this, 'FileIngestionDlq');
+    const ingestionQueue = new FileIngestionQueueConstruct(this, 'FileIngestionQueue', { dlq: ingestionDlq.queue });
+    const bucket         = new PipelineBucketConstruct(this, 'PipelineBucket', { ingestionQueue: ingestionQueue.queue });
 
     const uploadRequestFn = new UploadRequestFnConstruct(this, 'UploadRequestFn', {
-      jobTable:     jobTable.table,
+      jobTable:     jobsTable.table,
       schemasTable: schemasTable.table,
       bucket:       bucket.bucket,
+    });
+
+    new PipelineTriggerFnConstruct(this, 'PipelineTriggerFn', {
+      jobsTable: jobsTable.table,
+      queue:     ingestionQueue.queue,
     });
 
     const api = new HttpApiConstruct(this, 'HttpApi', {
@@ -33,4 +43,3 @@ export class AppStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'ApiUrl', { value: api.url, description: 'API Gateway URL' });
   }
 }
-

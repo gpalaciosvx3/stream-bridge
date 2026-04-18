@@ -42,4 +42,10 @@ export class ErrorDictionary {
     descripcion: 'El tipo de contenido no está soportado',
     statusCode: HttpStatus.BAD_REQUEST,
   };
+
+  static readonly JOB_NOT_FOUND: InputError = {
+    code: 'JOB-004',
+    descripcion: 'El job solicitado no existe',
+    statusCode: HttpStatus.NOT_FOUND,
+  };
 }

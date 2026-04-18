@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3Client } from '../../../common/s3/s3.client';
+import { s3Client } from '../../../common/config/aws.config';
 import { PresignedUrlS3Repository } from '../../domain/repository/presigned-url.s3.repository';
 
 @Injectable()
