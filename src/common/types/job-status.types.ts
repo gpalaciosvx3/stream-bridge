@@ -1,10 +1,9 @@
 export enum JobStatus {
-  PENDING = 'PENDING',
-  PROCESSING = 'PROCESSING',
-  PARSED = 'PARSED',
-  VALIDATED = 'VALIDATED',
+  PENDING          = 'PENDING',
+  PROCESSING       = 'PROCESSING',
+  PARSED           = 'PARSED',
+  VALIDATED        = 'VALIDATED',
   VALIDATION_FAILED = 'VALIDATION_FAILED',
-  LOADING = 'LOADING',
-  DONE = 'DONE',
-  FAILED = 'FAILED',
+  DONE             = 'DONE',
+  FAILED           = 'FAILED',
 }

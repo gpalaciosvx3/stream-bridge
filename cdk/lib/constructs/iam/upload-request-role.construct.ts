@@ -35,6 +35,10 @@ export class UploadRequestRoleConstruct extends Construct {
               actions:   ['dynamodb:PutItem'],
               resources: [props.jobsTableArn],
             }),
+            new iam.PolicyStatement({
+              actions:   ['dynamodb:Query'],
+              resources: [`${props.jobsTableArn}/index/clientId-index`],
+            }),
           ],
         }),
         DynamoDbGetSchema: new iam.PolicyDocument({

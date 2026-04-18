@@ -108,6 +108,7 @@ export class DynamoClient {
         TableName: table,
         IndexName: options.index,
         KeyConditionExpression: options.keyCondition,
+        FilterExpression: options.filterExpression,
         ExpressionAttributeNames: options.attributeNames,
         ExpressionAttributeValues: options.attributeValues,
       }),

@@ -6,13 +6,15 @@ import { UploadRequestOutput } from '../types/upload-request-output.types';
 
 export class JobEntity {
   private constructor(
-    public readonly jobId: string,
-    public readonly clientId: string,
-    public readonly status: JobStatus,
-    public readonly sourceKey: string,
-    public readonly createdAt: string,
-    public readonly updatedAt: string,
-    public readonly expiresAt: number,
+    public readonly jobId:       string,
+    public readonly clientId:    string,
+    public readonly filename:    string,
+    public readonly contentType: string,
+    public readonly status:      JobStatus,
+    public readonly sourceKey:   string,
+    public readonly createdAt:   string,
+    public readonly updatedAt:   string,
+    public readonly expiresAt:   number,
   ) {}
 
   static build(params: { clientId: string; filename: string; contentType: string }): JobEntity {
@@ -23,6 +25,8 @@ export class JobEntity {
     return new JobEntity(
       jobId,
       params.clientId,
+      params.filename,
+      params.contentType,
       JobStatus.PENDING,
       `${UploadRequestConstants.S3_RAW_UPLOADS_PREFIX}/${params.clientId}/${date}/${jobId}/${params.filename}`,
       now,

@@ -54,6 +54,12 @@ export class ErrorDictionary {
     descripcion: 'La S3 key no tiene el formato esperado',
     statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
   };
+  
+  static readonly JOB_IN_PROGRESS: InputError = {
+    code: 'JOB-006',
+    descripcion: 'Ya existe un job activo para este cliente y archivo',
+    statusCode: HttpStatus.CONFLICT,
+  };
 
   static readonly UNSUPPORTED_FORMAT: InputError = {
     code: 'PARSER-001',
