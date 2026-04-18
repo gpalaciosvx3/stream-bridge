@@ -38,7 +38,7 @@ export class ParserService {
     const strategy = ParserFactory.create(format);
     const rows     = strategy.parse(buffer);
 
-    this.logger.log('[PASO 5] Validando que el archivo no esté vacío después del parseo');
+    this.logger.log(`[PASO 5] Validando que el archivo no esté vacío después del parseo => totalRows: ${JSON.stringify(rows.length)} | format: ${format}`);
     this.assertNotEmpty(rows, entity.key);
 
     this.logger.log('[PASO 6] Construyendo metadata del archivo y subiendo resultado parseado a S3');

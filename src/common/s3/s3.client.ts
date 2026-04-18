@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { GetObjectCommand, PutObjectCommand, S3ServiceException } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Readable } from 'stream';
 import { s3Client } from '../config/aws.config';
 import { CustomException } from '../errors/custom.exception';
 import { ErrorDictionary } from '../errors/error.dictionary';
@@ -11,11 +10,8 @@ export class S3Client {
   async getObject(bucket: string, key: string): Promise<Buffer> {
     try {
       const response = await s3Client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-      const chunks: Uint8Array[] = [];
-      for await (const chunk of response.Body as Readable) {
-        chunks.push(chunk);
-      }
-      return Buffer.concat(chunks);
+      const bytes = await response.Body!.transformToByteArray();
+      return Buffer.from(bytes);
     } catch (error: unknown) {
       if (error instanceof S3ServiceException && error.name === 'NoSuchKey') {
         throw new CustomException(ErrorDictionary.S3_OBJECT_NOT_FOUND, key);
