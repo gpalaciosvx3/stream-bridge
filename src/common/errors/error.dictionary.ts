@@ -72,4 +72,10 @@ export class ErrorDictionary {
     descripcion: 'El input recibido desde Step Functions es inválido o incompleto',
     statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
   };
+
+  static readonly S3_OBJECT_NOT_FOUND: InputError = {
+    code: 'INFRA-001',
+    descripcion: 'El archivo solicitado no existe en S3',
+    statusCode: HttpStatus.NOT_FOUND,
+  };
 }

@@ -5,5 +5,8 @@ import { SFNClient } from '@aws-sdk/client-sfn';
 import { envConfig } from './env.config';
 
 export const dynamoDbClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: envConfig.awsRegion }));
-export const s3Client       = new S3Client({ region: envConfig.awsRegion });
-export const sfnClient      = new SFNClient({ region: envConfig.awsRegion });
+export const s3Client = new S3Client({
+  region: envConfig.awsRegion,
+  ...(!envConfig.isLambda ? { forcePathStyle: true } : {}),
+});
+export const sfnClient = new SFNClient({ region: envConfig.awsRegion });

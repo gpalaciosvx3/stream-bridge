@@ -3,6 +3,7 @@ import { EnvValidationMiddleware } from '../../../common/middleware/env-validati
 import { EnvConstants } from '../../../common/constants/env.constants';
 import { envConfig } from '../../../common/config/env.config';
 import { DynamoClient } from '../../../common/dynamo/dynamo.client';
+import { S3Client } from '../../../common/s3/s3.client';
 import { JobDbRepository } from '../../domain/repository/job.db.repository';
 import { JobDbRepositoryImpl } from '../repository/job.db.repository.impl';
 import { PresignedUrlS3Repository } from '../../domain/repository/presigned-url.s3.repository';
@@ -15,6 +16,7 @@ import { UploadRequestController } from '../controller/upload-request.controller
   providers: [
     EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_UPLOAD_REQUEST),
     { provide: DynamoClient, useFactory: () => new DynamoClient() },
+    { provide: S3Client,     useFactory: () => new S3Client() },
     {
       provide: JobDbRepository,
       useFactory: (dynamo: DynamoClient) => new JobDbRepositoryImpl(dynamo, envConfig.jobsTable),
@@ -22,7 +24,8 @@ import { UploadRequestController } from '../controller/upload-request.controller
     },
     {
       provide: PresignedUrlS3Repository,
-      useFactory: () => new PresignedUrlS3RepositoryImpl(envConfig.s3Bucket),
+      useFactory: (s3: S3Client) => new PresignedUrlS3RepositoryImpl(s3, envConfig.s3Bucket),
+      inject: [S3Client],
     },
     {
       provide: UploadRequestService,

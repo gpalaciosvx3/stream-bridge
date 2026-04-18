@@ -3,6 +3,7 @@ import { EnvValidationMiddleware } from '../../../common/middleware/env-validati
 import { EnvConstants } from '../../../common/constants/env.constants';
 import { envConfig } from '../../../common/config/env.config';
 import { DynamoClient } from '../../../common/dynamo/dynamo.client';
+import { S3Client } from '../../../common/s3/s3.client';
 import { JobDbRepository } from '../../domain/repository/job.db.repository';
 import { RawFileS3Repository } from '../../domain/repository/raw-file.s3.repository';
 import { StagedFileS3Repository } from '../../domain/repository/staged-file.s3.repository';
@@ -17,8 +18,17 @@ import { ParserController } from '../controller/parser.controller';
   providers: [
     EnvValidationMiddleware.register(EnvConstants.REQUERIDAS_PARSER),
     { provide: DynamoClient, useFactory: () => new DynamoClient() },
-    { provide: RawFileS3Repository,   useFactory: () => new RawFileS3RepositoryImpl() },
-    { provide: StagedFileS3Repository, useFactory: () => new StagedFileS3RepositoryImpl() },
+    { provide: S3Client,     useFactory: () => new S3Client() },
+    {
+      provide:    RawFileS3Repository,
+      useFactory: (s3: S3Client) => new RawFileS3RepositoryImpl(s3),
+      inject:     [S3Client],
+    },
+    {
+      provide:    StagedFileS3Repository,
+      useFactory: (s3: S3Client) => new StagedFileS3RepositoryImpl(s3),
+      inject:     [S3Client],
+    },
     {
       provide:    JobDbRepository,
       useFactory: (dynamo: DynamoClient) => new JobDbRepositoryImpl(dynamo, envConfig.jobsTable),

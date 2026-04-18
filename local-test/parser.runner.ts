@@ -4,9 +4,9 @@ import { ParseInput } from '../src/parser/domain/types/parser-input.types';
 
 const input: ParseInput = {
   clientId: 'dist-norte',
-  jobId:    '<JOB_ID>',
+  jobId:    'd2aec040-2cd4-45f4-8346-fd66aff74d33',
   bucket:   'ue1streambridges3001',
-  key:      'raw-uploads/dist-norte/<DATE>/<JOB_ID>/dist-norte.csv',
+  key:      'raw-uploads/dist-norte/2026-04-18/d2aec040-2cd4-45f4-8346-fd66aff74d33/dist-norte.csv',
 };
 
 handler(input)

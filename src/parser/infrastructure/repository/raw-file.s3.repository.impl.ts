@@ -1,15 +1,12 @@
-import { Readable } from 'stream';
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { s3Client } from '../../../common/config/aws.config';
+import { S3Client } from '../../../common/s3/s3.client';
 import { RawFileS3Repository } from '../../domain/repository/raw-file.s3.repository';
 
 export class RawFileS3RepositoryImpl extends RawFileS3Repository {
+  constructor(private readonly s3: S3Client) {
+    super();
+  }
+
   async download(bucket: string, key: string): Promise<Buffer> {
-    const response = await s3Client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
-    const chunks: Uint8Array[] = [];
-    for await (const chunk of response.Body as Readable) {
-      chunks.push(chunk);
-    }
-    return Buffer.concat(chunks);
+    return this.s3.getObject(bucket, key);
   }
 }

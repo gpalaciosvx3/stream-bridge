@@ -75,7 +75,8 @@ export class ParserService {
 
   private async reconcileStatus(jobId: string): Promise<void> {
     const job = await this.jobDbRepository.getById(jobId);
-    if (job?.status === JobStatus.PENDING) {
+    if (!job) throw new CustomException(ErrorDictionary.JOB_NOT_FOUND);
+    if (job.status === JobStatus.PENDING) {
       this.logger.warn(`Job ${jobId} encontrado en estado PENDING, se actualiza a PROCESSING para reconciliación antes de parsear`);
       await this.jobDbRepository.transitionToProcessing(jobId);
     }
