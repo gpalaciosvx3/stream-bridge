@@ -3,6 +3,8 @@ import { ErrorDictionary } from '../../../common/errors/error.dictionary';
 import { ParserConstants } from '../constants/parser.constants';
 import { ParseInput } from '../types/parser-input.types';
 import { ParseOutput } from '../types/parser-output.types';
+import { ParsedJobUpdate } from '../types/parsed-job-update.types';
+import { ParserFormat } from '../types/parser-format.types';
 
 export class ParseJobEntity {
   private constructor(
@@ -29,6 +31,17 @@ export class ParseJobEntity {
     if (!input.jobId?.trim())   throw new CustomException(ErrorDictionary.INVALID_STEP_FN_INPUT, 'jobId requerido');
     if (!input.bucket?.trim())  throw new CustomException(ErrorDictionary.INVALID_STEP_FN_INPUT, 'bucket requerido');
     if (!input.key?.trim())     throw new CustomException(ErrorDictionary.INVALID_STEP_FN_INPUT, 'key requerido');
+  }
+
+  toUpdate(checksum: string, totalRows: number, fileSizeKb: number, sourceFormat: ParserFormat): ParsedJobUpdate {
+    return {
+      totalRows,
+      fileSizeKb,
+      sourceFormat,
+      checksum,
+      stagedKey: this.stagedKey,
+      updatedAt: new Date().toISOString(),
+    };
   }
 
   toOutput(checksum: string, totalRows: number): ParseOutput {

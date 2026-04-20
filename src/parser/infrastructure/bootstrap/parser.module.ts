@@ -21,12 +21,12 @@ import { ParserController } from '../controller/parser.controller';
     { provide: S3Client,     useFactory: () => new S3Client() },
     {
       provide:    RawFileS3Repository,
-      useFactory: (s3: S3Client) => new RawFileS3RepositoryImpl(s3),
+      useFactory: (s3: S3Client) => new RawFileS3RepositoryImpl(s3, envConfig.s3Bucket),
       inject:     [S3Client],
     },
     {
       provide:    StagedFileS3Repository,
-      useFactory: (s3: S3Client) => new StagedFileS3RepositoryImpl(s3),
+      useFactory: (s3: S3Client) => new StagedFileS3RepositoryImpl(s3, envConfig.s3Bucket),
       inject:     [S3Client],
     },
     {

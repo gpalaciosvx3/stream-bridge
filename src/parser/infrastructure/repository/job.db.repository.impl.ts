@@ -18,11 +18,11 @@ export class JobDbRepositoryImpl extends JobDbRepository {
     return this.dynamo.get<JobRecord>(this.table, { jobId });
   }
 
-  async transitionToProcessing(jobId: string): Promise<void> {
+  async transitionToProcessing(jobId: string, updatedAt: string): Promise<void> {
     await this.dynamo.updateFieldsAndRemove(
       this.table,
       { jobId },
-      { status: JobStatus.PROCESSING, updatedAt: new Date().toISOString() },
+      { status: JobStatus.PROCESSING, updatedAt },
       ['expiresAt'],
     );
   }
@@ -35,7 +35,7 @@ export class JobDbRepositoryImpl extends JobDbRepository {
       sourceFormat: update.sourceFormat,
       checksum:     update.checksum,
       stagedKey:    update.stagedKey,
-      updatedAt:    new Date().toISOString(),
+      updatedAt:    update.updatedAt,
     });
   }
 }

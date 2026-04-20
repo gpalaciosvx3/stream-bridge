@@ -30,8 +30,8 @@ export class ParserService {
     this.logger.log(`[PASO 2] Reconciliando estado del jobId: ${entity.jobId} antes de iniciar el proceso de parseo`);
     await this.reconcileStatus(entity.jobId);
 
-    this.logger.log(`[PASO 3] Descargando archivo raw desde S3 => bucket: ${entity.bucket} | key: ${entity.key}`);
-    const buffer = await this.rawFileRepository.download(entity.bucket, entity.key);
+    this.logger.log(`[PASO 3] Descargando archivo raw desde S3 => key: ${entity.key}`);
+    const buffer = await this.rawFileRepository.download(entity.key);
 
     this.logger.log('[PASO 4] Detectando formato del archivo y parseando contenido');
     const format   = ParserFactory.detectFormat(entity.key);
@@ -47,17 +47,11 @@ export class ParserService {
     this.logger.log(`[PASO 7] Parseando documento a JSON => totalRows: ${rows.length} | fileSizeKb: ${fileSizeKb} | checksum: ${checksum}`);
     const parsedFile = ParsedFileEntity.build(rows, format).toFile();
 
-    this.logger.log(`[PASO 8] Subiendo archivo parseado a S3 => bucket: ${entity.bucket} | key: ${entity.stagedKey}`);
-    await this.stagedFileRepository.upload(entity.bucket, entity.stagedKey, parsedFile);
+    this.logger.log(`[PASO 8] Subiendo archivo parseado a S3 => key: ${entity.stagedKey}`);
+    await this.stagedFileRepository.upload(entity.stagedKey, parsedFile);
 
     this.logger.log('[PASO 9] Actualizando estado del job a PARSED con metadata del archivo');
-    await this.jobDbRepository.transitionToParsed(entity.jobId, {
-      totalRows: rows.length,
-      fileSizeKb,
-      sourceFormat: format,
-      checksum,
-      stagedKey: entity.stagedKey,
-    });
+    await this.jobDbRepository.transitionToParsed(entity.jobId, entity.toUpdate(checksum, rows.length, fileSizeKb, format));
 
     return entity.toOutput(checksum, rows.length);
   }
@@ -78,7 +72,7 @@ export class ParserService {
     if (!job) throw new CustomException(ErrorDictionary.JOB_NOT_FOUND);
     if (job.status === JobStatus.PENDING) {
       this.logger.warn(`Job ${jobId} encontrado en estado PENDING, se actualiza a PROCESSING para reconciliación antes de parsear`);
-      await this.jobDbRepository.transitionToProcessing(jobId);
+      await this.jobDbRepository.transitionToProcessing(jobId, new Date().toISOString());
     }
   }
 }

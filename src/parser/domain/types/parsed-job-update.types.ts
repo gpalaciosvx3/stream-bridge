@@ -6,4 +6,5 @@ export type ParsedJobUpdate = {
   sourceFormat: ParserFormat;
   checksum:     string;
   stagedKey:    string;
+  updatedAt:    string;
 };
