@@ -2,6 +2,7 @@ export class EnvConstants {
   static readonly AWS_REGION         = 'AWS_REGION';
   static readonly S3_BUCKET          = 'S3_BUCKET';
   static readonly JOBS_TABLE         = 'JOBS_TABLE';
+  static readonly SCHEMAS_TABLE      = 'SCHEMAS_TABLE';
   static readonly STEP_FUNCTIONS_ARN = 'STEP_FUNCTIONS_ARN';
 
   static readonly REQUERIDAS_UPLOAD_REQUEST: readonly string[] = [
@@ -17,5 +18,11 @@ export class EnvConstants {
   static readonly REQUERIDAS_PARSER: readonly string[] = [
     EnvConstants.S3_BUCKET,
     EnvConstants.JOBS_TABLE,
+  ];
+
+  static readonly REQUERIDAS_VALIDATOR: readonly string[] = [
+    EnvConstants.S3_BUCKET,
+    EnvConstants.JOBS_TABLE,
+    EnvConstants.SCHEMAS_TABLE,
   ];
 }

@@ -61,6 +61,12 @@ export class ErrorDictionary {
     statusCode: HttpStatus.CONFLICT,
   };
 
+  static readonly INVALID_JOB_STATUS: InputError = {
+    code: 'JOB-007',
+    descripcion: 'El job no se encuentra en un estado válido para esta operación',
+    statusCode: HttpStatus.CONFLICT,
+  };
+
   static readonly UNSUPPORTED_FORMAT: InputError = {
     code: 'PARSER-001',
     descripcion: 'El formato del archivo no está soportado',
@@ -83,5 +89,17 @@ export class ErrorDictionary {
     code: 'INFRA-001',
     descripcion: 'El archivo solicitado no existe en S3',
     statusCode: HttpStatus.NOT_FOUND,
+  };
+
+  static readonly SCHEMA_NOT_FOUND: InputError = {
+    code: 'VALIDATOR-001',
+    descripcion: 'No existe un schema activo registrado para el cliente',
+    statusCode: HttpStatus.NOT_FOUND,
+  };
+
+  static readonly VALIDATION_FAILED: InputError = {
+    code: 'VALIDATOR-002',
+    descripcion: 'El archivo no superó la validación según la política configurada',
+    statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
   };
 }

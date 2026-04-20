@@ -7,6 +7,7 @@ import { PipelineBucketConstruct } from './constructs/s3/pipeline-bucket.constru
 import { UploadRequestFnConstruct } from './constructs/lambda/upload-request/upload-request-fn.construct';
 import { PipelineTriggerFnConstruct } from './constructs/lambda/pipeline-trigger/pipeline-trigger-fn.construct';
 import { ParserFnConstruct } from './constructs/lambda/parser/parser-fn.construct';
+import { ValidatorFnConstruct } from './constructs/lambda/validator/validator-fn.construct';
 import { FileIngestionQueueConstruct } from './constructs/sqs/file-ingestion-queue.construct';
 import { FileIngestionDlqConstruct } from './constructs/sqs/file-ingestion-dlq.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
@@ -39,6 +40,12 @@ export class AppStack extends cdk.Stack {
     new ParserFnConstruct(this, 'ParserFn', {
       jobsTable: jobsTable.table,
       bucket:    bucket.bucket,
+    });
+
+    new ValidatorFnConstruct(this, 'ValidatorFn', {
+      jobsTable:    jobsTable.table,
+      schemasTable: schemasTable.table,
+      bucket:       bucket.bucket,
     });
 
     const api = new HttpApiConstruct(this, 'HttpApi', {
