@@ -20,6 +20,15 @@ export class SchemaDbRepositoryImpl extends SchemaDbRepository {
       attributeValues:  { ':clientId': clientId, ':active': true },
     });
 
-    return results.sort((a, b) => b.schemaVersion.localeCompare(a.schemaVersion))[0] ?? null;
+    return results
+      .sort((a, b) => b.schemaVersion.localeCompare(a.schemaVersion))
+      .map(r => {
+        const raw = typeof r.zodSchema === 'string' ? JSON.parse(r.zodSchema) : r.zodSchema;
+        const zodSchema = Array.isArray(raw)
+          ? raw
+          : Object.entries(raw).map(([name, field]) => ({ name, ...(field as object) }));
+        return { ...r, zodSchema };
+      })
+      [0] ?? null;
   }
 }

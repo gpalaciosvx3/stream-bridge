@@ -8,7 +8,8 @@
     "test:watch": "jest --watch",
     "local:seed": "ts-node local-test/seed.runner.ts",
     "local:upload-request": "ts-node local-test/upload-request.runner.ts",
-    "local:parser": "ts-node local-test/parser.runner.ts"
+    "local:parser": "ts-node local-test/parser.runner.ts",
+    "local:validator": "ts-node local-test/validator.runner.ts"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.600.0",

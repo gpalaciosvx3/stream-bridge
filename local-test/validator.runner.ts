@@ -6,7 +6,7 @@ const input: ValidatorInput = {
   clientId:  'dist-sur',
   jobId:     '4f7946c8-9112-4185-815c-bae74bb64e23',
   stagedKey: 'staging/4f7946c8-9112-4185-815c-bae74bb64e23/parsed.json',
-  checksum:  '',
+  checksum:  '222df7280c111cb1ffc9610b180d9f86e06a85eafe076378169f3515cde017c8',
   totalRows: 0,
 };
 

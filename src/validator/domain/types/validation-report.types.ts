@@ -1,6 +1,7 @@
 export type ValidationError = {
   row:     number;
   field:   string;
+  value:   unknown;
   message: string;
 };
 

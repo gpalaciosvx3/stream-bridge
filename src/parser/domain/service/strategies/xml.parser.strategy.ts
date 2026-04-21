@@ -10,8 +10,8 @@ export class XmlParserStrategy implements IParserStrategy {
     const parsed    = xmlParser.parse(buffer.toString('utf-8')) as Record<string, unknown>;
     const rootKey   = Object.keys(parsed)[0];
     const root      = parsed[rootKey] as Record<string, unknown>;
-    const itemKey   = Object.keys(root)[0];
-    const items     = root[itemKey];
+    const itemKey   = Object.keys(root).find(k => typeof root[k] === 'object' && root[k] !== null);
+    const items     = itemKey ? root[itemKey] : undefined;
     return Array.isArray(items) ? items : [items as Record<string, unknown>];
   }
 }

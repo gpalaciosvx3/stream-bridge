@@ -10,6 +10,7 @@ import { JobDbRepository } from '../repository/job.db.repository';
 import { ValidationJobEntity } from '../entities/validation-job.entity';
 import { ValidationReportEntity } from '../entities/validation-report.entity';
 import { ZodSchemaBuilder } from './zod-schema.builder';
+import { ZodMessageMapper } from './zod-message.mapper';
 import { ValidatorInput } from '../types/validator-input.types';
 import { ValidatorOutput } from '../types/validator-output.types';
 import { ValidationError } from '../types/validation-report.types';
@@ -37,6 +38,8 @@ export class ValidatorService {
     this.logger.log(`[PASO 3] Descargando archivo parseado desde S3 => key: ${entity.stagedKey}`);
     const parsedFile = await this.parsedFileRepository.download(entity.stagedKey);
 
+    this.logger.log('Archivo parseado', JSON.stringify(parsedFile));
+
     this.logger.log(`[PASO 4] Construyendo schema Zod => versión: ${schemaRecord.schemaVersion} | política: ${schemaRecord.validationPolicy}`);
     const zodSchema = ZodSchemaBuilder.build(schemaRecord.zodSchema);
 
@@ -46,7 +49,7 @@ export class ValidatorService {
     this.logger.log(`[PASO 6] Construyendo reporte de validación => total: ${parsedFile.rows.length} | errores encontrados: ${errors.length}`);
     const report = ValidationReportEntity.build(errors, parsedFile.rows.length, schemaRecord);
 
-    this.logger.log(`[PASO 7] Subiendo reporte de validación => total: ${report.total} | válidas: ${report.valid} | inválidas: ${report.invalid} | aprobó: ${report.passed}`);
+    this.logger.log('[PASO 7] Subiendo reporte de validación', JSON.stringify(report.toReport()));
     await this.reportRepository.upload(entity.reportKey, report.toReport());
 
     this.logger.log(`[PASO 8] Actualizando estado del job => ${report.toStatus()}`);
@@ -73,9 +76,8 @@ export class ValidatorService {
   }
 
   private assertJobStatus(job: JobRecord, jobId: string): void {
-    if (job.status !== ValidatorConstants.VALID_ENTRY_STATUS) {
-      throw new CustomException(ErrorDictionary.INVALID_JOB_STATUS, `jobId: ${jobId} | status actual: ${job.status}`);
-    }
+    const isValid = (ValidatorConstants.VALID_ENTRY_STATUSES as string[]).includes(job.status);
+    if (!isValid) throw new CustomException(ErrorDictionary.INVALID_JOB_STATUS, `jobId: ${jobId} | status actual: ${job.status}`);
   }
 
   private assertSchemaExists(schema: SchemaRecord | null, clientId: string): asserts schema is SchemaRecord {
@@ -98,8 +100,9 @@ export class ValidatorService {
     if (result.success) return [];
     return result.error.errors.map(e => ({
       row:     rowNumber,
-      field:   e.path.join('.'),
-      message: e.message,
+      field:   e.path.length > 0 ? e.path.join('.') : '(fila)',
+      value:   e.path.length > 0 ? row[e.path[0] as string] : row,
+      message: ZodMessageMapper.translate(e),
     }));
   }
 }
