@@ -25,4 +25,9 @@ export class EnvConstants {
     EnvConstants.JOBS_TABLE,
     EnvConstants.SCHEMAS_TABLE,
   ];
+
+  static readonly REQUERIDAS_LOADER: readonly string[] = [
+    EnvConstants.S3_BUCKET,
+    EnvConstants.JOBS_TABLE,
+  ];
 }

@@ -224,14 +224,30 @@ awslocal stepfunctions list-executions \
   --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:UE1STREAMBRIDGESFN001 \
   --max-results 10
 
-# Ver detalle de una ejecución (input, output, estado)
+# Listar solo ejecuciones FALLIDAS
+awslocal stepfunctions list-executions \
+  --state-machine-arn arn:aws:states:us-east-1:000000000000:stateMachine:UE1STREAMBRIDGESFN001 \
+  --status-filter FAILED \
+  --max-results 10
+
+# Ver detalle completo de una ejecución (input, output, estado final)
 awslocal stepfunctions describe-execution \
   --execution-arn <execution-arn>
 
-# Ver historial de eventos de una ejecución (debug paso a paso)
+# Ver historial de eventos paso a paso (ideal para debug)
 awslocal stepfunctions get-execution-history \
   --execution-arn <execution-arn> \
   --query 'events[*].{type:type,ts:timestamp,detail:taskSucceededEventDetails}'
+
+# Ver solo los eventos de fallo (TaskFailed, ExecutionFailed)
+awslocal stepfunctions get-execution-history \
+  --execution-arn <execution-arn> \
+  --query 'events[?type==`TaskFailed` || type==`ExecutionFailed`].{type:type,ts:timestamp,error:taskFailedEventDetails}'
+
+# Ver el output final de cada paso exitoso
+awslocal stepfunctions get-execution-history \
+  --execution-arn <execution-arn> \
+  --query 'events[?type==`TaskStateExited`].{name:stateExitedEventDetails.name,output:stateExitedEventDetails.output}'
 
 # Iniciar ejecución manualmente (prueba end-to-end)
 awslocal stepfunctions start-execution \
@@ -267,6 +283,9 @@ Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el
 |---|---|---|
 | Lambda upload-request | `UploadRequestFnConstruct` | `UE1STREAMBRIDGELMB001` |
 | Lambda pipeline-trigger | `PipelineTriggerFnConstruct` | `UE1STREAMBRIDGELMB002` |
+| Lambda parser | `ParserFnConstruct` | `UE1STREAMBRIDGELMB003` |
+| Lambda validator | `ValidatorFnConstruct` | `UE1STREAMBRIDGELMB004` |
+| Lambda loader | `LoaderFnConstruct` | `UE1STREAMBRIDGELMB005` |
 | DynamoDB jobs table | `JobsTableConstruct` | `UE1STREAMBRIDGEDDB001` |
 | DynamoDB schemas table | `SchemasTableConstruct` | `UE1STREAMBRIDGEDDB002` |
 | S3 pipeline bucket | `PipelineBucketConstruct` | `ue1streambridges3001` |
@@ -276,6 +295,9 @@ Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el
 | Step Functions State Machine | `PipelineStateMachineConstruct` | `UE1STREAMBRIDGESFN001` |
 | IAM Role upload-request | `UploadRequestRoleConstruct` | `UE1STREAMBRIDGEROL001` |
 | IAM Role pipeline-trigger | `PipelineTriggerRoleConstruct` | `UE1STREAMBRIDGEROL002` |
+| IAM Role parser | `ParserRoleConstruct` | `UE1STREAMBRIDGEROL003` |
+| IAM Role validator | `ValidatorRoleConstruct` | `UE1STREAMBRIDGEROL004` |
+| IAM Role loader | `LoaderRoleConstruct` | `UE1STREAMBRIDGEROL005` |
 | IAM Role Step Functions | `SfnRoleConstruct` | `UE1STREAMBRIDGEROL006` |
 
 ---

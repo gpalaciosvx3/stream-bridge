@@ -8,6 +8,8 @@ import { UploadRequestFnConstruct } from './constructs/lambda/upload-request/upl
 import { PipelineTriggerFnConstruct } from './constructs/lambda/pipeline-trigger/pipeline-trigger-fn.construct';
 import { ParserFnConstruct } from './constructs/lambda/parser/parser-fn.construct';
 import { ValidatorFnConstruct } from './constructs/lambda/validator/validator-fn.construct';
+import { LoaderFnConstruct } from './constructs/lambda/loader/loader-fn.construct';
+import { PipelineStateMachineConstruct } from './constructs/sfn/pipeline-state-machine.construct';
 import { FileIngestionQueueConstruct } from './constructs/sqs/file-ingestion-queue.construct';
 import { FileIngestionDlqConstruct } from './constructs/sqs/file-ingestion-dlq.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
@@ -37,15 +39,27 @@ export class AppStack extends cdk.Stack {
       queue:     ingestionQueue.queue,
     });
 
-    new ParserFnConstruct(this, 'ParserFn', {
+    const parserFn = new ParserFnConstruct(this, 'ParserFn', {
       jobsTable: jobsTable.table,
       bucket:    bucket.bucket,
     });
 
-    new ValidatorFnConstruct(this, 'ValidatorFn', {
+    const validatorFn = new ValidatorFnConstruct(this, 'ValidatorFn', {
       jobsTable:    jobsTable.table,
       schemasTable: schemasTable.table,
       bucket:       bucket.bucket,
+    });
+
+    const loaderFn = new LoaderFnConstruct(this, 'LoaderFn', {
+      jobsTable: jobsTable.table,
+      bucket:    bucket.bucket,
+    });
+
+    new PipelineStateMachineConstruct(this, 'PipelineStateMachine', {
+      parserFnArn:    parserFn.fn.functionArn,
+      validatorFnArn: validatorFn.fn.functionArn,
+      loaderFnArn:    loaderFn.fn.functionArn,
+      jobsTable:      jobsTable.table,
     });
 
     const api = new HttpApiConstruct(this, 'HttpApi', {
