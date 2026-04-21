@@ -2,11 +2,16 @@ import 'dotenv/config';
 import { handler } from '../src/parser/infrastructure/bootstrap/parser.handler';
 import { ParseInput } from '../src/parser/domain/types/parser-input.types';
 
+const clientId = process.env.TEST_CLIENT_ID  ?? 'CLIENT-ID';
+const jobId    = process.env.TEST_JOB_ID     ?? 'JOB-ID';
+const ext      = process.env.TEST_FILE_EXT   ?? 'EXT';
+const date     = process.env.TEST_DATE       ?? new Date().toISOString().split('T')[0];
+
 const input: ParseInput = {
-  clientId: 'dist-norte',
-  jobId:    'd2aec040-2cd4-45f4-8346-fd66aff74d33',
-  bucket:   'ue1streambridges3001',
-  key:      'raw-uploads/dist-norte/2026-04-18/d2aec040-2cd4-45f4-8346-fd66aff74d33/dist-norte.csv',
+  clientId,
+  jobId,
+  bucket: 'ue1streambridges3001',
+  key:    `raw-uploads/${clientId}/${date}/${jobId}/${clientId}.${ext}`,
 };
 
 handler(input)
