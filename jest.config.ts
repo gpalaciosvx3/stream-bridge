@@ -7,8 +7,9 @@ export default {
   testMatch: ['**/*.steps.ts'],
   collectCoverage: true,
   collectCoverageFrom: [
-    'src/ping/domain/**/*.ts',
-    'src/ping/application/**/*.ts',
+    'src/*/domain/service/**/*.ts',
+    'src/*/domain/entities/**/*.ts',
+    '!src/*/**/*.{types,dto,constants,error,mapper,factory,strategy}.ts',
   ],
   coverageThreshold: {
     global: {

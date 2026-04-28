@@ -25,6 +25,24 @@ export class ErrorDictionary {
     statusCode: HttpStatus.BAD_REQUEST,
   };
 
+  static readonly DYNAMO_UNAVAILABLE: InputError = {
+    code: 'APP-004',
+    descripcion: 'Servicio de base de datos DynamoDB no disponible',
+    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  };
+  
+  static readonly S3_UNAVAILABLE: InputError = {
+    code: 'APP-005',
+    descripcion: 'Servicio de almacenamiento S3 no disponible',
+    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  };
+
+  static readonly SFN_UNAVAILABLE: InputError = {
+    code: 'APP-006',
+    descripcion: 'Servicio Step Functions no disponible',
+    statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+  };
+
   static readonly INVALID_CLIENT_ID: InputError = {
     code: 'JOB-001',
     descripcion: 'El clientId no puede estar vacío',

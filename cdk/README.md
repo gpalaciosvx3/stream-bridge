@@ -262,7 +262,6 @@ awslocal stepfunctions start-execution \
 
 | Stage | Branch | Cuenta |
 |---|---|---|
-| `local` | `local` | `000000000000` (LocalStack) |
 | `dev` | `develop` | `CDK_DEFAULT_ACCOUNT` |
 | `qa` | `release` | pendiente |
 | `prd` | `master` | pendiente |

@@ -28,12 +28,16 @@ export class LoaderService {
     this.logger.log(`[PASO 1] Construyendo entidad para jobId: ${input.jobId}`);
     const entity = LoadJobEntity.build(input);
 
-    this.logger.log(`[PASO 2] Verificando precondiciones para jobId: ${entity.jobId}`);
-    const job = await this.assertPreconditions(entity);
+    this.logger.log(`[PASO 2] Verificando existencia del job: ${entity.jobId}`);
+    const job = await this.jobDbRepository.getById(entity.jobId);
+    this.assertJobExists(job, entity.jobId);
 
     this.logger.log(`[PASO 2] Verificando idempotencia para jobId: ${entity.jobId} | checksum: ${entity.checksum}`);
     const idempotentOutput = this.resolveIdempotency(job, entity);
     if (idempotentOutput) return idempotentOutput;
+
+    this.logger.log(`[PASO 2] Verificando status del job: ${entity.jobId}`);
+    this.assertJobStatus(job, entity.jobId);
 
     this.logger.log(`[PASO 3] Descargando archivo parseado desde S3 => key: ${entity.stagedKey}`);
     const parsedFile = await this.stagedFileRepository.download(entity.stagedKey);
@@ -59,12 +63,6 @@ export class LoaderService {
     return entity.toOutput();
   }
 
-  private async assertPreconditions(entity: LoadJobEntity): Promise<JobRecord> {
-    const job = await this.jobDbRepository.getById(entity.jobId);
-    this.assertJobExists(job, entity.jobId);
-    this.assertJobStatus(job, entity.jobId);
-    return job;
-  }
 
   private resolveIdempotency(job: JobRecord, entity: LoadJobEntity): LoaderOutput | null {
     if (!this.isAlreadyProcessed(job, entity.checksum)) return null;
