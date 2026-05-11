@@ -234,7 +234,7 @@ pip install awscli-local
 
 cd cdk
 cdklocal bootstrap
-CDK_STAGE=local cdklocal deploy --require-approval never
+cdklocal deploy --require-approval never
 ```
 
 ### Runners locales
@@ -253,9 +253,9 @@ Archivos de ejemplo para probar el pipeline en `local-test/samples/` (CSV, XML, 
 ```bash
 cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
 
-CDK_STAGE=dev cdk diff
-CDK_STAGE=dev cdk deploy --require-approval never
-CDK_STAGE=dev cdk destroy
+cdk diff
+cdk deploy --require-approval never
+cdk destroy
 ```
 
 > Endpoint: `https://{id}.execute-api.us-east-1.amazonaws.com/{stage}/v1/{path}`
@@ -268,16 +268,14 @@ CDK_STAGE=dev cdk destroy
 
 | Archivo | Trigger | Acción |
 |---|---|---|
-| `dev.yml` | `push` a `develop` | Deploy en AWS DEV |
-| `qa.yml` | `push` a `release` | Deploy en AWS QA |
-| `prd.yml` | `push` a `master` | Deploy en AWS PRD |
-| `destroy.yml` | Manual (`workflow_dispatch`) | Destruye el stack del stage seleccionado |
+| `deploy.yml` | `push` / `pull_request` a `master` | Build + deploy en AWS |
+| `destroy.yml` | Manual (`workflow_dispatch`) | Destruye el stack en AWS |
 
 ### Secretos requeridos
 
 Configurar en GitHub → Settings → Environments:
 
-**`deployer-dev` / `deployer-qa` / `deployer-prd`:**
+**`deployer`:**
 ```
 AWS_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY

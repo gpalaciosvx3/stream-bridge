@@ -5,7 +5,6 @@ import { ResourceConstants } from '../../../common/constants/resource.constants'
 
 interface HttpApiProps {
   uploadRequestFn: lambda.IFunction;
-  stage: string;
 }
 
 export class HttpApiConstruct extends Construct {
@@ -17,7 +16,7 @@ export class HttpApiConstruct extends Construct {
     const api = new apigateway.RestApi(this, 'Api', {
       restApiName: ResourceConstants.API_INGESTION,
       description: 'API de ingesta de archivos StreamBridge',
-      deployOptions: { stageName: props.stage },
+      deployOptions: { stageName: 'prod' },
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: ['POST', 'OPTIONS'],

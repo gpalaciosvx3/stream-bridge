@@ -1,6 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { StageConfig } from '../common/types/stage-config.types';
 import { JobsTableConstruct } from './constructs/dynamo/jobs-table.construct';
 import { SchemasTableConstruct } from './constructs/dynamo/schemas-table.construct';
 import { PipelineBucketConstruct } from './constructs/s3/pipeline-bucket.construct';
@@ -14,9 +13,7 @@ import { FileIngestionQueueConstruct } from './constructs/sqs/file-ingestion-que
 import { FileIngestionDlqConstruct } from './constructs/sqs/file-ingestion-dlq.construct';
 import { HttpApiConstruct } from './constructs/api-gateway/http-api.construct';
 
-interface AppStackProps extends cdk.StackProps {
-  config: StageConfig;
-}
+type AppStackProps = cdk.StackProps;
 
 export class AppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: AppStackProps) {
@@ -64,7 +61,6 @@ export class AppStack extends cdk.Stack {
 
     const api = new HttpApiConstruct(this, 'HttpApi', {
       uploadRequestFn: uploadRequestFn.fn,
-      stage: props.config.stage,
     });
 
     new cdk.CfnOutput(this, 'ApiUrl', { value: api.url, description: 'API Gateway URL' });

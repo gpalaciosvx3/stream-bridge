@@ -12,7 +12,6 @@ Infraestructura AWS del proyecto `stream-bridge`, definida con AWS CDK (TypeScri
 - [Desarrollo en LocalStack](#desarrollo-en-localstack)
 - [Despliegue en AWS](#despliegue-en-aws)
 - [Comandos de referencia](#comandos-de-referencia)
-- [Stages y configuración](#stages-y-configuración)
 - [Recursos desplegados](#recursos-desplegados)
 - [Outputs del stack](#outputs-del-stack)
 
@@ -37,8 +36,6 @@ cdk/
       sqs/              # Queue de ingesta + DLQ
   common/
     constants/          # NamingConstants, ResourceConstants, InfraConstants
-    stages/             # local.stage.ts, dev.stage.ts
-    types/              # StageConfig
   docker-compose.yml    # LocalStack Pro para desarrollo local
 ```
 
@@ -97,20 +94,20 @@ npm run destroy:local    # destruir stack
 
 ```bash
 # Bootstrap (una vez por cuenta/región)
-CDK_STAGE=dev cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
+cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
 
 # Preview
-CDK_STAGE=dev cdk diff
+cdk diff
 
 # Deploy
-CDK_STAGE=dev cdk deploy --require-approval never
+cdk deploy --require-approval never
 ```
 
 ### Scripts disponibles
 
 ```bash
-npm run deploy:dev       # deploy a AWS DEV
-npm run diff:dev         # diff en AWS DEV
+npm run deploy       # deploy a AWS
+npm run diff         # diff en AWS
 ```
 
 ---
@@ -255,24 +252,6 @@ awslocal stepfunctions start-execution \
   --name test-manual-$(date +%s) \
   --input '{"clientId":"ac-farma","jobId":"<jobId>","bucket":"ue1streambridges3001","key":"raw-uploads/ac-farma/2026-04-18/<jobId>/test.csv"}'
 ```
-
----
-
-## Stages y configuración
-
-| Stage | Branch | Cuenta |
-|---|---|---|
-| `dev` | `develop` | `CDK_DEFAULT_ACCOUNT` |
-| `qa` | `release` | pendiente |
-| `prd` | `master` | pendiente |
-
-El stage se controla con la variable de entorno `CDK_STAGE`:
-
-```bash
-CDK_STAGE=dev cdk deploy ...
-```
-
-Para agregar un nuevo stage: crear `cdk/common/stages/qa.stage.ts` y extender el `switch` en `bin/app.ts`.
 
 ---
 
